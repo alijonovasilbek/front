@@ -3,10 +3,10 @@ import type { Student, Group, Payment, Contract } from './types';
 import { PaymentStatus, StudentStatus } from './types';
 
 export const GROUPS: Group[] = [
-  { id: 1, name: 'U-10 Lions', coach: 'Aziz Haydarov', studentIds: [1, 2, 3, 4] },
-  { id: 2, name: 'U-12 Tigers', coach: 'Server Djeparov', studentIds: [5, 6, 7] },
-  { id: 3, name: 'U-14 Eagles', coach: 'Timur Kapadze', studentIds: [8, 9, 10] },
-  { id: 4, name: 'Goalkeepers', coach: 'Ignatiy Nesterov', studentIds: [1] },
+  { id: 1, name: 'U-10 Lions', coach: 'Aziz Haydarov', studentIds: [1, 2, 3, 4], monthlyFee: 500000 },
+  { id: 2, name: 'U-12 Tigers', coach: 'Server Djeparov', studentIds: [5, 6, 7], monthlyFee: 600000 },
+  { id: 3, name: 'U-14 Eagles', coach: 'Timur Kapadze', studentIds: [8, 9, 10], monthlyFee: 700000 },
+  { id: 4, name: 'Goalkeepers', coach: 'Ignatiy Nesterov', studentIds: [1], monthlyFee: 550000 },
 ];
 
 export const STUDENTS: Student[] = [

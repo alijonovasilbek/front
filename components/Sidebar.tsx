@@ -5,11 +5,12 @@ import type { Page } from '../types';
 interface SidebarProps {
   currentPage: Page;
   setCurrentPage: (page: Page) => void;
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ currentPage, setCurrentPage }) => {
+const Sidebar: React.FC<SidebarProps> = ({ currentPage, setCurrentPage, isOpen, setIsOpen }) => {
   
-  // Fix: Replaced JSX.Element with React.ReactElement to resolve namespace error.
   const navItems: { name: Page; icon: React.ReactElement }[] = [
     { name: 'Dashboard', icon: <HomeIcon /> },
     { name: 'Students', icon: <UsersIcon /> },
@@ -18,7 +19,6 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, setCurrentPage }) => {
     { name: 'StudentPortal', icon: <UserCircleIcon /> },
   ];
 
-  // Fix: Replaced JSX.Element with React.ReactElement to resolve namespace error.
   const NavLink: React.FC<{item: {name: Page, icon: React.ReactElement}}> = ({ item }) => {
     const isActive = currentPage === item.name;
     return (
@@ -37,26 +37,34 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, setCurrentPage }) => {
   };
   
   return (
-    <aside className="w-64 flex-shrink-0 bg-bunyodkor-blue text-white flex flex-col p-4">
-      <div className="flex items-center mb-8 px-2">
-         <svg className="w-12 h-12 text-bunyodkor-yellow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2a10 10 0 00-9.4 13.57l5.9 5.9a10 10 0 0013.57 0l5.9-5.9A10 10 0 0012 2zm-1.06 9.54L9 13.5l1.06 1.06L12 12.5l1.94 1.94L15 13.5l-1.94-1.94L15 9.5l-1.06-1.06L12 10.5l-1.94-1.94L9 9.5l1.94 1.94z" />
-        </svg>
-        <div className="ml-3">
-            <h1 className="text-xl font-bold">Bunyodkor</h1>
-            <p className="text-xs text-yellow-200">Academy CRM</p>
-        </div>
-      </div>
-      <nav className="flex-1 space-y-2">
-        {navItems.map(item => <NavLink key={item.name} item={item} />)}
-      </nav>
-      <div className="mt-auto">
-          <div className="text-center text-xs text-gray-300 p-4">
-              <p>&copy; {new Date().getFullYear()} Bunyodkor FC</p>
-              <p>All Rights Reserved</p>
+    <>
+      {/* Overlay for mobile */}
+      <div
+        className={`fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden transition-opacity ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        onClick={() => setIsOpen(false)}
+        aria-hidden="true"
+      ></div>
+      <aside className={`w-64 flex-shrink-0 bg-bunyodkor-blue text-white flex flex-col p-4 fixed inset-y-0 left-0 z-40 transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0 transition-transform duration-300 ease-in-out`}>
+        <div className="flex items-center mb-8 px-2">
+           <svg className="w-12 h-12 text-bunyodkor-yellow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2a10 10 0 00-9.4 13.57l5.9 5.9a10 10 0 0013.57 0l5.9-5.9A10 10 0 0012 2zm-1.06 9.54L9 13.5l1.06 1.06L12 12.5l1.94 1.94L15 13.5l-1.94-1.94L15 9.5l-1.06-1.06L12 10.5l-1.94-1.94L9 9.5l1.94 1.94z" />
+          </svg>
+          <div className="ml-3">
+              <h1 className="text-xl font-bold">Bunyodkor</h1>
+              <p className="text-xs text-yellow-200">Academy CRM</p>
           </div>
-      </div>
-    </aside>
+        </div>
+        <nav className="flex-1 space-y-2">
+          {navItems.map(item => <NavLink key={item.name} item={item} />)}
+        </nav>
+        <div className="mt-auto">
+            <div className="text-center text-xs text-gray-300 p-4">
+                <p>&copy; {new Date().getFullYear()} Bunyodkor FC</p>
+                <p>All Rights Reserved</p>
+            </div>
+        </div>
+      </aside>
+    </>
   );
 };
 

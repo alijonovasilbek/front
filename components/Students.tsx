@@ -1,20 +1,26 @@
-
 import React, { useState, useMemo } from 'react';
-import { STUDENTS, GROUPS } from '../constants';
 import type { Student, Group } from '../types';
 import { StudentStatus } from '../types';
 import StudentProfile from './StudentProfile';
+import AddStudentModal from './AddStudentModal';
 
-const Students: React.FC = () => {
+interface StudentsProps {
+  students: Student[];
+  groups: Group[];
+  onAddStudent: (studentData: Omit<Student, 'id' | 'avatarUrl' | 'performance'>) => void;
+}
+
+const Students: React.FC<StudentsProps> = ({ students, groups, onAddStudent }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState<StudentStatus | 'all'>('all');
     const [groupFilter, setGroupFilter] = useState<number | 'all'>('all');
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-    const studentsWithGroup = useMemo(() => STUDENTS.map(student => ({
+    const studentsWithGroup = useMemo(() => students.map(student => ({
         ...student,
-        group: GROUPS.find(g => g.id === student.groupId)
-    })), []);
+        group: groups.find(g => g.id === student.groupId)
+    })), [students, groups]);
 
     const filteredStudents = useMemo(() => {
         return studentsWithGroup.filter(student => {
@@ -26,11 +32,16 @@ const Students: React.FC = () => {
         });
     }, [searchTerm, statusFilter, groupFilter, studentsWithGroup]);
     
+    const handleAddStudent = (newStudentData: Omit<Student, 'id' | 'avatarUrl' | 'performance'>) => {
+        onAddStudent(newStudentData);
+        setIsAddModalOpen(false);
+    };
+
     return (
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                  <h1 className="text-3xl font-bold text-text-primary">Students</h1>
-                 <button className="bg-bunyodkor-blue text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-800 transition duration-300 flex items-center">
+                 <button onClick={() => setIsAddModalOpen(true)} className="bg-bunyodkor-blue text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-800 transition duration-300 flex items-center">
                     <PlusIcon className="w-5 h-5 mr-2" />
                     Add Student
                 </button>
@@ -42,14 +53,14 @@ const Students: React.FC = () => {
                         <input
                             type="text"
                             placeholder="Search by name or email..."
-                            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-bunyodkor-blue"
+                            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-bunyodkor-blue bg-white text-gray-900 placeholder-gray-500"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                         <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                     </div>
                     <select
-                        className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-bunyodkor-blue"
+                        className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-bunyodkor-blue bg-white"
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value as StudentStatus | 'all')}
                     >
@@ -58,12 +69,12 @@ const Students: React.FC = () => {
                         <option value={StudentStatus.Inactive}>Inactive</option>
                     </select>
                     <select
-                        className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-bunyodkor-blue"
+                        className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-bunyodkor-blue bg-white"
                         value={groupFilter}
                         onChange={(e) => setGroupFilter(e.target.value === 'all' ? 'all' : Number(e.target.value))}
                     >
                         <option value="all">All Groups</option>
-                        {GROUPS.map(group => (
+                        {groups.map(group => (
                             <option key={group.id} value={group.id}>{group.name}</option>
                         ))}
                     </select>
@@ -110,7 +121,10 @@ const Students: React.FC = () => {
             </div>
 
             {selectedStudent && (
-                 <StudentProfile student={selectedStudent} group={GROUPS.find(g => g.id === selectedStudent.groupId)!} onClose={() => setSelectedStudent(null)} />
+                 <StudentProfile student={selectedStudent} group={groups.find(g => g.id === selectedStudent.groupId)!} onClose={() => setSelectedStudent(null)} />
+            )}
+            {isAddModalOpen && (
+                <AddStudentModal onClose={() => setIsAddModalOpen(false)} onAddStudent={handleAddStudent} groups={groups} />
             )}
         </div>
     );

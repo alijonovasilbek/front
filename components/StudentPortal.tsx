@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import type { Student, Group } from '../types';
 import { STUDENTS, GROUPS, PAYMENTS, CONTRACTS } from '../constants';
 import { PaymentStatus } from '../types';
@@ -12,17 +12,18 @@ const StudentPortal: React.FC = () => {
     const group = GROUPS.find(g => g.id === student.groupId)!;
     const studentPayments = PAYMENTS.filter(p => p.studentId === student.id).sort((a, b) => new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime());
     const studentContract = CONTRACTS.find(c => c.studentId === student.id);
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
 
     const performanceData = [
-        { name: 'Goals', value: student.performance.goals },
-        { name: 'Assists', value: student.performance.assists },
-        { name: 'Attendance', value: student.performance.attendance },
+        { name: 'Goals', value: student.performance.goals, fill: '#00529B' },
+        { name: 'Assists', value: student.performance.assists, fill: '#007ACC' },
+        { name: 'Attendance %', value: student.performance.attendance, fill: '#FFD100' },
     ];
 
     return (
         <div className="space-y-8">
-            <div className="bg-card shadow-md rounded-xl p-8 flex items-center">
-                <img src={student.avatarUrl} alt={student.name} className="w-24 h-24 rounded-full mr-6 border-4 border-bunyodkor-yellow" />
+            <div className="bg-card shadow-md rounded-xl p-6 sm:p-8 flex flex-col sm:flex-row items-center text-center sm:text-left">
+                <img src={student.avatarUrl} alt={student.name} className="w-24 h-24 rounded-full mr-0 sm:mr-6 mb-4 sm:mb-0 border-4 border-bunyodkor-yellow" />
                 <div>
                     <h1 className="text-3xl font-bold text-text-primary">Welcome, {student.name.split(' ')[0]}!</h1>
                     <p className="text-text-secondary text-lg">Here is your academy overview.</p>
@@ -35,7 +36,7 @@ const StudentPortal: React.FC = () => {
                     <div className="bg-card shadow-md rounded-xl p-6">
                         <h2 className="text-xl font-bold text-text-primary mb-4">Season Performance</h2>
                          <ResponsiveContainer width="100%" height={250}>
-                            <BarChart data={performanceData} layout="vertical" margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
+                            <BarChart data={performanceData} layout="vertical" margin={{ top: 5, right: 20, left: 30, bottom: 5 }}>
                                 <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                                 <XAxis type="number" tick={{ fill: '#64748B' }} />
                                 <YAxis type="category" dataKey="name" width={80} tick={{ fill: '#64748B' }} />
@@ -50,21 +51,21 @@ const StudentPortal: React.FC = () => {
                         <h2 className="text-xl font-bold text-text-primary mb-4">Payment History</h2>
                         <ul className="space-y-3">
                             {studentPayments.map(p => (
-                                <li key={p.id} className="flex justify-between items-center p-3 rounded-lg bg-gray-50">
+                                <li key={p.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-3 rounded-lg bg-gray-50 gap-2">
                                     <div>
                                         <p className="font-semibold text-gray-800">{p.amount.toLocaleString('uz-UZ')} UZS</p>
                                         <p className="text-sm text-gray-500">Due: {new Date(p.dueDate).toLocaleDateString()}</p>
                                     </div>
-                                    <div className="flex items-center">
-                                       {p.status === PaymentStatus.Paid && p.date && <p className="text-sm text-gray-500 mr-4">Paid on: {new Date(p.date).toLocaleDateString()}</p>}
-                                        <span className={`px-3 py-1 text-sm font-semibold rounded-full ${
+                                    <div className="flex items-center w-full sm:w-auto">
+                                       {p.status === PaymentStatus.Paid && p.date && <p className="text-sm text-gray-500 mr-4 hidden md:block">Paid on: {new Date(p.date).toLocaleDateString()}</p>}
+                                        <span className={`px-3 py-1 text-sm font-semibold rounded-full w-full text-center sm:w-auto ${
                                             p.status === PaymentStatus.Paid ? 'bg-green-100 text-green-700' : p.status === PaymentStatus.Due ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
                                         }`}>{p.status}</span>
                                     </div>
                                 </li>
                             ))}
                         </ul>
-                         <button className="mt-4 w-full bg-bunyodkor-yellow text-bunyodkor-blue font-bold py-2 px-4 rounded-lg hover:opacity-90 transition duration-300">
+                         <button onClick={() => setShowPaymentModal(true)} className="mt-4 w-full bg-bunyodkor-yellow text-bunyodkor-blue font-bold py-2 px-4 rounded-lg hover:opacity-90 transition duration-300">
                             Make a Payment
                         </button>
                     </div>
@@ -89,6 +90,17 @@ const StudentPortal: React.FC = () => {
                      </div>
                 </div>
             </div>
+            {showPaymentModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={() => setShowPaymentModal(false)}>
+                    <div className="bg-white p-8 rounded-lg shadow-xl text-center max-w-sm w-full" onClick={e => e.stopPropagation()}>
+                        <h3 className="text-xl font-bold text-text-primary mb-2">Payment System</h3>
+                        <p className="text-text-secondary mb-6">This is a demo. Payment functionality is not implemented.</p>
+                        <button onClick={() => setShowPaymentModal(false)} className="bg-bunyodkor-blue text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-800 transition duration-300">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
@@ -96,7 +108,7 @@ const StudentPortal: React.FC = () => {
 const InfoItem: React.FC<{ label: string; value: string}> = ({ label, value}) => (
     <div className="text-sm mb-2">
         <span className="font-semibold text-gray-600 mr-2">{label}:</span>
-        <span className="text-gray-800">{value}</span>
+        <span className="text-gray-800 break-all">{value}</span>
     </div>
 );
 

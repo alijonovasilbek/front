@@ -16,12 +16,19 @@ const StudentProfile: React.FC<StudentProfileProps> = ({ student, group, onClose
     const [isLoadingSummary, setIsLoadingSummary] = useState(false);
 
     useEffect(() => {
-        // Prevent body scroll when modal is open
+        const handleEscape = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                onClose();
+            }
+        };
+        document.addEventListener('keydown', handleEscape);
         document.body.style.overflow = 'hidden';
+        
         return () => {
+            document.removeEventListener('keydown', handleEscape);
             document.body.style.overflow = 'auto';
         };
-    }, []);
+    }, [onClose]);
 
     const studentPayments = PAYMENTS.filter(p => p.studentId === student.id);
     const studentContract = CONTRACTS.find(c => c.studentId === student.id);
@@ -34,21 +41,21 @@ const StudentProfile: React.FC<StudentProfileProps> = ({ student, group, onClose
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4" onClick={onClose}>
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="student-profile-title">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-                <div className="p-8">
+                <div className="p-6 sm:p-8">
                     <div className="flex justify-between items-start mb-6">
-                        <div className="flex items-center">
-                            <img src={student.avatarUrl} alt={student.name} className="w-24 h-24 rounded-full mr-6 border-4 border-bunyodkor-blue" />
+                        <div className="flex flex-col sm:flex-row items-center text-center sm:text-left">
+                            <img src={student.avatarUrl} alt={student.name} className="w-24 h-24 rounded-full mr-0 sm:mr-6 mb-4 sm:mb-0 border-4 border-bunyodkor-blue" />
                             <div>
-                                <h2 className="text-3xl font-bold text-gray-800">{student.name}</h2>
+                                <h2 id="student-profile-title" className="text-3xl font-bold text-gray-800">{student.name}</h2>
                                 <p className="text-lg text-gray-600">{group.name} - {group.coach}</p>
                                 <span className={`mt-2 inline-block px-3 py-1 text-sm font-semibold rounded-full ${
                                     student.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                                 }`}>{student.status}</span>
                             </div>
                         </div>
-                        <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+                        <button onClick={onClose} className="text-gray-400 hover:text-gray-600" aria-label="Close profile">
                             <XIcon className="w-8 h-8"/>
                         </button>
                     </div>
@@ -147,12 +154,11 @@ const InfoCard: React.FC<{title: string; children: React.ReactNode}> = ({title, 
     </div>
 );
 
-// Fix: Replaced JSX.Element with React.ReactElement to resolve namespace error.
 const InfoItem: React.FC<{icon: React.ReactElement; label: string; value: string}> = ({icon, label, value}) => (
     <div className="flex items-center text-sm mb-2">
-        <span className="text-gray-500 w-5 h-5 mr-3">{icon}</span>
+        <span className="text-gray-500 w-5 h-5 mr-3 flex-shrink-0">{icon}</span>
         <span className="font-semibold text-gray-600 mr-2">{label}:</span>
-        <span className="text-gray-800">{value}</span>
+        <span className="text-gray-800 break-all">{value}</span>
     </div>
 );
 

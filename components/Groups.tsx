@@ -1,21 +1,37 @@
+import React, { useState } from 'react';
+import type { Group, Student } from '../types';
+import GroupDetailsModal from './GroupDetailsModal';
+import AddGroupModal from './AddGroupModal';
 
-import React from 'react';
-import { GROUPS, STUDENTS } from '../constants';
+interface GroupsProps {
+  groups: Group[];
+  students: Student[];
+  onAddGroup: (groupData: Omit<Group, 'id' | 'studentIds'>) => void;
+  onAddStudentToGroup: (studentId: number, groupId: number) => void;
+}
 
-const Groups: React.FC = () => {
+const Groups: React.FC<GroupsProps> = ({ groups, students, onAddGroup, onAddStudentToGroup }) => {
+  const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
+  const [isAddGroupModalOpen, setIsAddGroupModalOpen] = useState(false);
+
+  const handleAddGroup = (groupData: Omit<Group, 'id' | 'studentIds'>) => {
+    onAddGroup(groupData);
+    setIsAddGroupModalOpen(false);
+  };
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
         <h1 className="text-3xl font-bold text-text-primary">Training Groups</h1>
-        <button className="bg-bunyodkor-blue text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-800 transition duration-300 flex items-center">
+        <button onClick={() => setIsAddGroupModalOpen(true)} className="bg-bunyodkor-blue text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-800 transition duration-300 flex items-center w-full sm:w-auto justify-center">
             <PlusIcon className="w-5 h-5 mr-2" />
             Add Group
         </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {GROUPS.map(group => {
-            const groupStudents = STUDENTS.filter(s => s.groupId === group.id);
+        {groups.map(group => {
+            const groupStudents = students.filter(s => group.studentIds.includes(s.id));
             return (
                 <div key={group.id} className="bg-card rounded-xl shadow-md p-6 flex flex-col justify-between hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                     <div>
@@ -49,7 +65,7 @@ const Groups: React.FC = () => {
                         </div>
                     </div>
                     <div className="mt-6">
-                         <button className="w-full bg-gray-100 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-200 transition duration-300">
+                         <button onClick={() => setSelectedGroup(group)} className="w-full bg-gray-100 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-200 transition duration-300">
                             Manage Group
                         </button>
                     </div>
@@ -57,6 +73,8 @@ const Groups: React.FC = () => {
             )
         })}
       </div>
+      {selectedGroup && <GroupDetailsModal group={selectedGroup} students={students} onAddStudentToGroup={onAddStudentToGroup} onClose={() => setSelectedGroup(null)} />}
+      {isAddGroupModalOpen && <AddGroupModal onClose={() => setIsAddGroupModalOpen(false)} onAddGroup={handleAddGroup} />}
     </div>
   );
 };

@@ -1,11 +1,9 @@
 
 import React, { useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { STUDENTS, PAYMENTS, GROUPS } from '../constants';
 import { PaymentStatus, StudentStatus } from '../types';
-import type { Student, Payment } from '../types';
+import type { Student, Payment, Group } from '../types';
 
-// Fix: Replaced JSX.Element with React.ReactElement to resolve namespace error.
 const StatCard: React.FC<{ title: string; value: string; icon: React.ReactElement; color: string }> = ({ title, value, icon, color }) => (
     <div className="bg-card p-6 rounded-xl shadow-md flex items-center justify-between">
         <div>
@@ -18,24 +16,30 @@ const StatCard: React.FC<{ title: string; value: string; icon: React.ReactElemen
     </div>
 );
 
-const Dashboard: React.FC = () => {
-    const totalStudents = STUDENTS.length;
-    const activeStudents = STUDENTS.filter(s => s.status === StudentStatus.Active).length;
+interface DashboardProps {
+    students: Student[];
+    groups: Group[];
+    payments: Payment[];
+}
+
+const Dashboard: React.FC<DashboardProps> = ({ students, groups, payments }) => {
+    const totalStudents = students.length;
+    const activeStudents = students.filter(s => s.status === StudentStatus.Active).length;
     
     const totalRevenue = useMemo(() => 
-        PAYMENTS.filter(p => p.status === PaymentStatus.Paid)
+        payments.filter(p => p.status === PaymentStatus.Paid)
                 .reduce((acc, p) => acc + p.amount, 0),
-    []);
+    [payments]);
 
     const paymentsDue = useMemo(() =>
-        PAYMENTS.filter(p => p.status === PaymentStatus.Due || p.status === PaymentStatus.Overdue).length,
-    []);
+        payments.filter(p => p.status === PaymentStatus.Due || p.status === PaymentStatus.Overdue).length,
+    [payments]);
     
     const monthlyRevenueData = useMemo(() => {
         const months = ["January", "February", "March", "April", "May", "June", "July"];
         const data = months.map(month => ({ name: month.substring(0,3), revenue: 0 }));
-        PAYMENTS.forEach(p => {
-            if (p.status === PaymentStatus.Paid) {
+        payments.forEach(p => {
+            if (p.status === PaymentStatus.Paid && p.date) {
                 const monthIndex = new Date(p.date).getMonth();
                 if(monthIndex < data.length) {
                     data[monthIndex].revenue += p.amount;
@@ -43,21 +47,22 @@ const Dashboard: React.FC = () => {
             }
         });
         return data.map(d => ({ ...d, revenue: d.revenue / 1000000 })); // in millions UZS
-    }, []);
+    }, [payments]);
 
     const groupDistributionData = useMemo(() => 
-        GROUPS.map(group => ({
+        groups.map(group => ({
             name: group.name,
-            value: STUDENTS.filter(s => s.groupId === group.id).length
+            value: students.filter(s => s.groupId === group.id).length
         })), 
-    []);
+    [groups, students]);
 
     const recentPayments = useMemo(() =>
-        PAYMENTS
-            .sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime())
+        payments
+            .filter(p => p.date)
+            .sort((a, b) => new Date(b.date!).getTime() - new Date(a.date!).getTime())
             .slice(0, 5)
-            .map(p => ({...p, student: STUDENTS.find(s => s.id === p.studentId)}))
-    , []);
+            .map(p => ({...p, student: students.find(s => s.id === p.studentId)}))
+    , [payments, students]);
 
     const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
@@ -140,10 +145,12 @@ const Dashboard: React.FC = () => {
     );
 };
 
+// FIX: Add definitions for missing icon components (UserCheckIcon, CashIcon, ExclamationIcon) and complete UsersIcon.
 // Icons
 const UsersIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M15 21a6 6 0 00-6-6h6a6 6 0 006 6" /></svg>;
 const UserCheckIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
 const CashIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>;
 const ExclamationIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>;
 
+// FIX: Add a default export for the Dashboard component to resolve import error in App.tsx.
 export default Dashboard;

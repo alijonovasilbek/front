@@ -14,7 +14,7 @@ export interface Payment {
   id: string;
   studentId: number;
   amount: number;
-  date: string;
+  date: string; // Empty if not paid
   dueDate: string;
   status: PaymentStatus;
 }
@@ -32,6 +32,7 @@ export interface Group {
   name: string;
   coach: string;
   studentIds: number[];
+  monthlyFee: number;
 }
 
 export interface Student {
