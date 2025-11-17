@@ -83,7 +83,7 @@ const Payments: React.FC<PaymentsProps> = ({ payments, students, groups, onRecor
                          <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                     </div>
                      <select
-                        className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-bunyodkor-blue bg-white"
+                        className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-bunyodkor-blue bg-white text-text-primary"
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value as PaymentStatus | 'all')}
                     >

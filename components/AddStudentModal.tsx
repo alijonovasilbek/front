@@ -62,6 +62,7 @@ const AddStudentModal: React.FC<AddStudentModalProps> = ({ onClose, onAddStudent
         <form onSubmit={handleSubmit}>
           <div className="p-8">
             <div className="flex justify-between items-start mb-6">
+              {/* FIX: Changed invalid <h> tag to <h2> for semantic correctness and to resolve JSX error. */}
               <h2 id="add-student-title" className="text-2xl font-bold text-gray-800">Add New Student</h2>
               <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-600" aria-label="Close modal">
                 <XIcon className="w-8 h-8" />
@@ -114,7 +115,7 @@ const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement> & { label: str
 const Select: React.FC<React.SelectHTMLAttributes<HTMLSelectElement> & { label: string }> = ({ label, children, ...props }) => (
     <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-        <select {...props} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-bunyodkor-blue bg-white">
+        <select {...props} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-bunyodkor-blue bg-white text-gray-900">
             {children}
         </select>
     </div>
